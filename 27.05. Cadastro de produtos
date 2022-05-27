@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Estoque - Cadastro de novos produtos</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="css/estilos.css">
+    <script src="js/funcoes.js"></script>
+</head>
+
+<body onload="carregarTotalEstoque('totalEstoque')">
+    <!--Carrinho de compras-->
+    <div class="carrinho">
+        <img src="">
+        <p>Itens no estoque: <span id="totalEstoque">0</span></p>
+    </div>
+    
+    <!--Formulário: Nome, código e quantidade de produtos-->
+    <form>
+        <table>
+            <caption>Cadastro de novos produtos</caption>
+            <!--Nome do produto-->
+            <tr>
+                <td class="alinharRotulos">Nome do produto:</td>
+                <td><input id="txtNomeProduto" type="text"></td>
+            </tr>
+            <!--Código do produto-->
+            <tr>
+                <td class="alinharRotulos">Código do produto:</td>
+                <td><input id="txtCodProduto" type="text"></td>
+            </tr>
+            <!--Quantidade do produto-->
+            <tr>
+                <td class="alinharRotulos">Quantidade do produto:</td>
+                <td>
+                    <select id="qtidadeProduto">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </td>
+            </tr>
+            <!--Botoes-->
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="button" value="Cadastrar" class="alinhaBtns" onclick="validarProduto('txtNomeProduto','txtCodProduto','qtidadeProduto')">
+                    <input type="button" value="Ver estoque" class="alinhaBtns" onclick="window.open('verEstoque.html','_self')">
+                    <input type="reset" value="Limpar" class="alinhaBtns">
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+
+</html>
+
+
+
+js
+
+
+//-----------------------------------------------------------------------------------------------------------
+// Função: validarProduto(idNomeProduto, idCodProduto, idQtidadeProduto)
+// Verifica se foram informados o nome e o código do produto
+// Parâmetros:
+// - idNomeProduto: id do campo que contém o nome do produto
+// - idCodProduto: id do campo que contém o código do produto
+// - idQtidadeProduto: id do campo que contém a quantidade do produto
+// OBS: Se faltar alguma informação (nome ou código do produto) aparecerá uma mensagem de erro. Em caso de 
+// sucesso (todas as informações preenchidas), chama a função cadastrarProduto(...)
+// Retorno: nenhum
+//-----------------------------------------------------------------------------------------------------------
+function validarProduto(idNomeProduto, idCodProduto, idQtidadeProduto) {
+    let nome = document.getElementById(idNomeProduto).value;
+    let codigo = document.getElementById(idCodProduto).value;
+    let qtidade = document.getElementById(idQtidadeProduto).value;
+
+    if (nome == "")
+        alert("Nome do produto não pode estar em branco. Favor preenchê-lo!");
+    else if (codigo == "")
+        alert("Código do produto não pode estar em branco. Favor preenchê-lo!");
+    else cadastrarProduto(nome, codigo, parseInt(qtidade));
+}
+//-----------------------------------------------------------------------------------------------------------
+// Função: cadastrarProduto(produto, codig, qtidade)
+// Cadastra um novo produto (nome, código e quantidade) no estoque
+// Parâmetros:
+// - produto: nome do produto a ser cadastrado no estoque (Ex: arroz)
+// - codig: código do produto a ser cadastrado no estoque (Ex: a01)
+// - qtidade: quantidade do produto a ser cadastrado no estoque (Ex: 7)
+// OBS: Apos cadastrar o novo produto no estoque, atualiza a quantidade de itens no carrinho, ou seja, chama 
+// a função atualizarTotalEstoque()
+// Retorno: nenhum
+//-----------------------------------------------------------------------------------------------------------
+function cadastrarProduto(produto, codig, qtidade) {
+    let novoProduto = {nome:produto, codigo:codig, quantidade:qtidade};
+
+    if (typeof(Storage) !== "undefined") {
+        let produtos = localStorage.getItem("produtos");
+        if (produtos == null) produtos = []; // Nenhum produto ainda foi cadastrado
+        else produtos = JSON.parse(produtos);
+        produtos.push(novoProduto); // Adiciona um novo produto
+        localStorage.setItem("produtos",JSON.stringify(produtos))
+        alert("Foram cadastradas com sucesso "+qtidade+" unidades do produto "+ produto+"!");
+        atualizarTotalEstoque("totalEstoque");
+        location.reload();
+    } 
+    else alert("A versão do seu navegador é muito antiga. Por isso, não será possível executar essa aplicação");
+}
+
+//-----------------------------------------------------------------------------------------------------------
+// Função: atualizarTotalEstoque(idCampo)
+// Incrementa a quantidade de itens cadastrado no estoque (carrinho localizado no canto superior da tela)
+// Parâmetros:
+// - idCampo: identificador do campo que contem a quantidade de itens no estoque
+// Retorno: nenhum
+//-----------------------------------------------------------------------------------------------------------
+function atualizarTotalEstoque(idCampo) {
+    localStorage.setItem("totalEstoque",++document.getElementById(idCampo).innerHTML)
+}
+//-----------------------------------------------------------------------------------------------------------
+// Função: carregarTotalEstoque(idCampo)
+// Incrementa a quantidade de itens cadastrado no estoque (carrinho localizado no canto superior da tela)
+// Parâmetros:
+// - idCampo: identificador do campo que contem a quantidade de itens no estoque
+// Retorno: nenhum
+//-----------------------------------------------------------------------------------------------------------
+function carregarTotalEstoque(idCampo) {
+    if (typeof(Storage) !== "undefined") {
+        let totalEstoque = localStorage.getItem("totalEstoque");
+        if (totalEstoque == null) totalEstoque = 0;
+        document.getElementById(idCampo).innerHTML = totalEstoque;
+    }
+    else alert("A versão do seu navegador é muito antiga. Por isso, não será possível executar essa aplicação");
+}
+
+//-----------------------------------------------------------------------------------------------------------
+// Exibe todos os itens do estoque (nome, código e quantidade)
+// Retorno: nenhum
+//-----------------------------------------------------------------------------------------------------------
+function listarEstoque() {
+    if (typeof(Storage) !== "undefined") {
+        let produtos = localStorage.getItem("produtos");
+        document.write("<h1>Estoque:</h1>")
+        if (produtos == null)
+            document.write("<h3>Ainda não há nenhum item no estoque</h3>");
+        else {
+            produtos = JSON.parse(produtos);
+            produtos.forEach(produto => {
+                document.write("<ul>");
+                document.write("<li>Nome do produto: "+produto.nome+"</li>");
+                document.write("<li>Código do produto: "+produto.codigo+"</li>");
+                document.write("<li>Quantidade no estoque: "+produto.quantidade+"</li>");
+                document.write("</ul>");
+            });
+        }
+    } 
+    else alert("A versão do seu navegador é muito antiga. Por isso, não será possível visualizar o estoque!");    
+    
+    
+    
+    
+}
+
+
+
+
+
+css
+
+
+.alinharRotulos {
+    text-align: right;
+}
+.alinhaBtns {
+    width:30%;
+    background-color: black;
+    color:white;
+    border:0px;
+    padding:5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.carrinho {
+    width:300px; 
+    float:right;
+}
+.carrinho p {
+    display: inline;
+}
+table {
+    clear:both; 
+    background-color: rgb(202, 181, 182);
+    border-radius: 10px; 
+    color:white;
+    padding:10px;
+    width:400px;
+    margin:auto;
+}
+caption {
+    color:rgb(117, 104, 104); 
+    font-weight: bold; 
+    font-size: 25px;
+}
